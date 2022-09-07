@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Pro'Tech</title>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+  <canvas id="canvas" width="1000" height="1000"></canvas>
+  <div id="form">
+    <form action="">
+      <label for="nb_node" class="label">Nombre de noeuds</label>
+      <input type="range" id="nb_node" value="10" min="2" max="20" oninput="this.nextElementSibling.value = this.value">
+      <output>10</output><br><br>
+      <label for="connectivity" class="label">Connectivité</label>
+      <input type="range" id="connectivity" value=".1" min="0" max=".5" step=".01" name="connectivity"><br><br>
+      <label for="seed_input" class="label">Seed</label>
+      <input type="text" id="seed_input" name="seed_input"><br><br>
+
+      <input type="submit" id="generate" value="Générer">
+    </form>
+  </div>
+
+  <p id="seed_container">Seed: <span id="seed"> </span></p>
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+  <script src="random_seed.js"></script>
+  <script src="springy.js"></script>
+  <script src="springyui.js"></script>
+  <script src="main.js"></script>
+</body>
+
+</html>
