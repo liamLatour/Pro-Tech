@@ -1,14 +1,12 @@
-//FIXME: fix the seed not being a seed at launch
-
 class Random {
     constructor(seed="") {
         this.weak_seed = seed;
         if (seed == "") {
-            console.log("here");
             this.weak_seed = Math.random().toString().substring(2);
         }
         this.seed = this.cyrb128(this.weak_seed);
         this.rand_gen = this.sfc32(this.seed[0], this.seed[1], this.seed[2], this.seed[3]);
+        this.rand_gen();
     }
 
     cyrb128(str) {
@@ -52,10 +50,28 @@ class Random {
             return [Math.round(this.rand_gen() * 40) + 1, Math.round(this.rand_gen() * 40) + 1];
         }
 
-        return -1;
+        return [-1, -1];
     }
 
-    rand_in_array(array) {
+    normalize_coefs(coefs){
+        let sum_coefs = coefs.reduce((partialSum, a) => partialSum + a, 0);
+
+        return coefs.map(x => x/sum_coefs);
+    }
+
+    rand_in_array(array, coefs=0) {
+        if(coefs!=0){
+            let current = 0;
+            let rand = this.rand_gen();
+            coefs = this.normalize_coefs(coefs);
+
+            for(let i=0; i<array.length; i++){
+                current += coefs[i];
+                if(current >= rand){
+                    return array[i];
+                }
+            }
+        }
         return array[Math.round(this.rand_gen() * (array.length - 1))];
     }
 }
@@ -65,7 +81,6 @@ document.getElementById("seed").innerHTML = random.weak_seed;
 
 $('#form').submit(function () {
     let seed = $('#seed_input').val();
-
     random = new Random(seed);
 
     document.getElementById("seed").innerHTML = random.weak_seed;

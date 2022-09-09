@@ -15,10 +15,10 @@
   <div id="form">
     <form action="">
       <label for="nb_node" class="label">Nombre de noeuds</label>
-      <input type="range" id="nb_node" value="10" min="2" max="20" oninput="this.nextElementSibling.value = this.value">
+      <input type="range" id="nb_node" value="5" min="2" max="20" oninput="this.nextElementSibling.value = this.value">
       <output>10</output><br><br>
       <label for="connectivity" class="label">Connectivité</label>
-      <input type="range" id="connectivity" value=".1" min="0" max=".5" step=".01" name="connectivity"><br><br>
+      <input type="range" id="connectivity" value="1" min="0" max=".5" step=".01" name="connectivity"><br><br>
       <label for="seed_input" class="label">Seed</label>
       <input type="text" id="seed_input" name="seed_input"><br><br>
 
@@ -32,6 +32,7 @@
   <script src="random_seed.js"></script>
   <script src="springy.js"></script>
   <script src="springyui.js"></script>
+  <script src="ant_colony.js"></script>
   <script src="main.js"></script>
 </body>
 
