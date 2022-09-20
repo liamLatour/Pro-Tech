@@ -11,7 +11,7 @@ class Ant {
         this.seen_edges = [];
         this.nb_edges = nb_edges;
         this.dnf = false;
-        this.max_iterations = 100;
+        this.max_iterations = 10;
     }
 
     get_neighbors(potential_neighbors, pheromones) {
@@ -88,9 +88,9 @@ class Ant {
 }
 
 class AntColony {
-    constructor(nb_ants = 400) {
+    constructor(nb_ants = 40) {
         this.nb_ants = nb_ants;
-        this._graph = [];
+        this.graph = [];
         this.pheromone = [];
         this.nb_edges = 0;
 
@@ -98,25 +98,26 @@ class AntColony {
         this.pheromone_capacity = 2;
     }
 
-    set graph(graph) {
-        this._graph = graph;
+    set _graph(_graph) {
+        this.graph = _graph;
         this.nb_edges = this.calculate_edges();
         
-        for (let i = 0; i < graph.length; i++) {
-            this.pheromone.push(Array.apply(null, Array(graph.length)).map(function (x, i) {
+        for (let _ of _graph) {
+            this.pheromone.push(Array.apply(null, Array(_graph.length)).map(function (x, i) {
                 return .2;
             }));
         }
+    }
 
-        console.log(graph);
-        console.log(this.pheromone);
+    get_pheromone(source, target){
+        return this.pheromone[source][target];
     }
 
     calculate_edges() {
         let nb_edges = 0;
 
-        for (let i = 0; i < this._graph.length; i++) {
-            nb_edges += this._graph[i].reduce((partialSum, a) => {
+        for (let el of this.graph) {
+            nb_edges += el.reduce((partialSum, a) => {
                 if(a > 0){
                     return partialSum + 1;
                 }
@@ -124,7 +125,7 @@ class AntColony {
             }, 0);
         }
 
-        console.log(nb_edges);
+        //console.log(nb_edges);
 
         return nb_edges;
     }
@@ -146,7 +147,7 @@ class AntColony {
         let paths = [];
 
         for (let i = 0; i < this.nb_ants; i++) {
-            let ant = new Ant(this._graph, this.pheromone, this.nb_edges);
+            let ant = new Ant(this.graph, this.pheromone, this.nb_edges);
             ant.run();
             paths.push([ant.path, ant.path_length()]);
         }
@@ -162,7 +163,7 @@ class AntColony {
             }
         });
 
-        console.log(paths[0]);
+        //console.log(paths[0]);
 
         // update pheromones
         // evaporate
@@ -186,17 +187,3 @@ class AntColony {
         this.normalize_pheromones();
     }
 }
-
-/**
- * a - x/b
- * 
- * nb_ants/b = a
- * 
- * nb_ants^2/2b + 1 = a*nb_ants
- * 
- * 
- * b = 1/2
- * 
- * s*n  = A*2
- * 
- */

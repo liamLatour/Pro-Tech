@@ -316,7 +316,7 @@
 		this.repulsion = repulsion; // repulsion constant
 		this.damping = damping; // velocity damping factor
 		this.minEnergyThreshold = minEnergyThreshold || 0.1; //threshold used to determine render stop
-		this.maxSpeed = maxSpeed || Infinity; // nodes aren't allowed to exceed this speed
+		this.maxSpeed = maxSpeed || 400; // nodes aren't allowed to exceed this speed
 
 		this.nodePoints = {}; // keep track of points associated with nodes
 		this.edgeSprings = {}; // keep track of springs associated with edges
@@ -324,7 +324,7 @@
 
 	Layout.ForceDirected.prototype.point = function (node) {
 		if (!(node.id in this.nodePoints)) {
-			var mass = (node.data.mass !== undefined) ? node.data.mass : 1.0;
+			var mass = (node.data.mass !== undefined) ? node.data.mass : 5.0;
 			this.nodePoints[node.id] = new Layout.ForceDirected.Point(Vector.random(), mass);
 		}
 
@@ -485,9 +485,7 @@
 
 		// TODO: fine tune this
 		Springy.requestAnimationFrame(function step() {
-			//for(let i=0; i<10; i++){
 			t.tick(0.03);
-			//}
 
 			if (render !== undefined) {
 				render();
