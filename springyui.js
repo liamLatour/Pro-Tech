@@ -174,13 +174,6 @@
 				let x2 = toScreen(p2).x;
 				let y2 = toScreen(p2).y;
 
-				//ctx.beginPath();
-				//ctx.moveTo(x1, y1);
-				//ctx.lineTo(x2, y2);
-				//ctx.lineWidth = 3;
-				//ctx.strokeStyle = "black";
-				//ctx.stroke();
-
 				let direction = new Springy.Vector(x2 - x1, y2 - y1);
 				let normal = direction.normal().normalise();
 
@@ -285,7 +278,6 @@
 					ctx.fillText(text, 0, -2);
 					ctx.restore();
 				}
-
 			},
 			function drawNode(node, p) {
 				let s = toScreen(p);
