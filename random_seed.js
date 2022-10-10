@@ -45,6 +45,10 @@ class Random {
         }
     }
 
+    rand_int(min, max){
+        return Math.round(this.rand_gen() * ((max-min) - 1))+min;
+    }
+
     rand_weight() {
         return Math.round(this.rand_gen() * 40) + 1;
     }
@@ -68,7 +72,7 @@ class Random {
                 }
             }
         }
-        return array[Math.round(this.rand_gen() * (array.length - 1))];
+        return array[this.rand_int(0, array.length)];
     }
 }
 
