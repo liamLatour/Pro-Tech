@@ -29,19 +29,18 @@ class Graph {
         this.arrowLength = 15;
         this.arrowWidth = 6;
         this.line_offset = 3;
-		this.edge_font = "14px Verdana, sans-serif";
-
-        this.generate();
+        this.edge_font = "14px Verdana, sans-serif";
+        this.stop = false;
     }
 
-    distance(u, v=[0, 0]) {
+    distance(u, v = [0, 0]) {
         return Math.sqrt(Math.pow(u[0] - v[0], 2) + Math.pow(u[1] - v[1], 2));
     }
 
-    winded_distance(u, v){
+    winded_distance(u, v) {
         let wind_effect = this.dot(this.sub(v, u), this.wind_direction);
         let dist = this.distance(u, v);
-        return Math.exp(-wind_effect/dist)*dist + .1;
+        return Math.exp(-wind_effect / dist) * dist + .1;
     }
 
     nearest_node(u) {
@@ -58,7 +57,7 @@ class Graph {
     }
 
     random_node() {
-        return [random.rand_gen()*this.grid_size, random.rand_gen()*this.grid_size];
+        return [random.rand_gen() * this.grid_size, random.rand_gen() * this.grid_size];
     }
 
     generate() {
@@ -102,7 +101,7 @@ class Graph {
 
         // first remove non planar arcs
         let non_planar_arcs = this.non_planar_arcs();
-        
+
         while (non_planar_arcs.length > 0) {
             let to_remove = random.rand_in_array(non_planar_arcs);
             this.graph[to_remove[1]][to_remove[0]] = -1;
@@ -124,11 +123,8 @@ class Graph {
         //this.nb_edges = (this.nb_points * (this.nb_points - 1)) / 2 - nb_arcs_remove;
         this.longest_edge = this.getMax(this.graph);
 
-        this.ant_colony.graph = this;
+        this.ant_colony.graph = this.graph;
     }
-
-    // 01957740444835987
-    // 10
 
     getMax(a) {
         return Math.max(...a.map(e => Array.isArray(e) ? this.getMax(e) : e));
@@ -139,7 +135,7 @@ class Graph {
 
         let non_planar_arcs = [];
 
-        for(let arc in valid_arcs){
+        for (let arc in valid_arcs) {
             let i = valid_arcs[arc][0];
             let j = valid_arcs[arc][1];
             if (this.graph[i][j] > 0 && this.non_planar_arc(this.nodes_position[i], this.nodes_position[j])) {
@@ -163,44 +159,44 @@ class Graph {
     }
 
     sub(a, b) {
-        return [a[0]-b[0], a[1]-b[1]];
+        return [a[0] - b[0], a[1] - b[1]];
     }
 
     add(a, b) {
-        return [a[0]+b[0], a[1]+b[1]];
+        return [a[0] + b[0], a[1] + b[1]];
     }
 
-    mul(a, x){
-        return [a[0]*x, a[1]*x];
+    mul(a, x) {
+        return [a[0] * x, a[1] * x];
     }
 
-    cross(a, b){
-        return a[0]*b[1] - a[1]*b[0];
+    cross(a, b) {
+        return a[0] * b[1] - a[1] * b[0];
     }
 
-    dot(a, b){
-        return a[0]*b[0]+a[1]*b[1];
+    dot(a, b) {
+        return a[0] * b[0] + a[1] * b[1];
     }
 
-    normalize(a){
+    normalize(a) {
         let length = this.distance(a);
-        return [a[0]/length, a[1]/length];
+        return [a[0] / length, a[1] / length];
     }
 
-    back(a, b, d){
+    back(a, b, d) {
         let slope = this.normalize(this.sub(a, b));
 
         return this.sub(a, this.mul(slope, d));
     }
 
-    offset_line(a, b, d){
+    offset_line(a, b, d) {
         let slope = this.sub(a, b);
         let direction = this.normalize([-slope[1], slope[0]]);
 
         return [this.add(a, this.mul(direction, d)), this.add(b, this.mul(direction, d))];
     }
 
-    offset(a, b, d){
+    offset(a, b, d) {
         let slope = this.sub(a, b);
         let direction = this.normalize([-slope[1], slope[0]]);
 
@@ -221,7 +217,7 @@ class Graph {
         let t = this.cross(qp, s) / rs;
         let u = this.cross(qp, r) / rs;
 
-        return rs != 0 && t<=1 && t>=0 && u<=1 && u>=0;
+        return rs != 0 && t <= 1 && t >= 0 && u <= 1 && u >= 0;
     }
 
     get_bridge_arcs() {
@@ -283,14 +279,20 @@ class Graph {
         return valid_arcs;
     }
 
-    update() {
+    run() {
+        let t = this;
+
         this.ant_colony.next_iteration();
+        this.draw();
+
+        setTimeout(() => {
+            if(!t.stop){
+                t.run();
+            }
+        }, 200);
     }
 
-    update_color(edge) {
-        let source = edge.source.id;
-        let target = edge.target.id;
-
+    edge_color(source, target) {
         let value = Math.floor(this.ant_colony.get_pheromone(source, target) * 255).toString(16);
 
         return "#" + value + "0000";
@@ -310,6 +312,8 @@ class Graph {
 
             for (let j = 0; j < this.nb_points; j++) {
                 if (this.graph[i][j] > 0) {
+                    ctx.fillStyle = this.edge_color(i, j);
+
                     let x1 = (this.nodes_position[i][0] + 1) * w;
                     let y1 = (this.nodes_position[i][1] + 1) * w;
                     let x2 = (this.nodes_position[j][0] + 1) * w;
@@ -331,74 +335,37 @@ class Graph {
                     ctx.stroke();
 
                     // Arrow
-					ctx.save();
-					ctx.translate(arrow_end[0], arrow_end[1]);
-					ctx.rotate(Math.atan2(y2 - y1, x2 - x1));
-					ctx.beginPath();
-					ctx.moveTo(-this.arrowLength, this.arrowWidth);
-					ctx.lineTo(0, 0);
-					ctx.lineTo(-this.arrowLength, -this.arrowWidth);
-					ctx.lineTo(-this.arrowLength * 0.8, -0);
-					ctx.closePath();
-					ctx.fill();
-					ctx.restore();
+                    ctx.save();
+                    ctx.translate(arrow_end[0], arrow_end[1]);
+                    ctx.rotate(Math.atan2(y2 - y1, x2 - x1));
+                    ctx.beginPath();
+                    ctx.moveTo(-this.arrowLength, this.arrowWidth);
+                    ctx.lineTo(0, 0);
+                    ctx.lineTo(-this.arrowLength, -this.arrowWidth);
+                    ctx.lineTo(-this.arrowLength * 0.8, -0);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
 
                     // Label
                     ctx.save();
-					ctx.textAlign = "center";
-					ctx.textBaseline = "top";
-					ctx.font = this.edge_font;
-					let angle = Math.atan2(y2 - y1, x2 - x1);
-					let displacement = -14;
-					if ((angle > Math.PI / 2 || angle < -Math.PI / 2)) {
-					  	displacement = -20;
-						angle += Math.PI;
-					}
-					let textPos = this.offset(this.mul(this.add(off[0], off[1]), .5), off[1], displacement);
-                    
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "top";
+                    ctx.font = this.edge_font;
+                    let angle = Math.atan2(y2 - y1, x2 - x1);
+                    let displacement = -14;
+                    if ((angle > Math.PI / 2 || angle < -Math.PI / 2)) {
+                        displacement = -20;
+                        angle += Math.PI;
+                    }
+                    let textPos = this.offset(this.mul(this.add(off[0], off[1]), .5), off[1], displacement);
+
                     ctx.translate(textPos[0], textPos[1]);
-					ctx.rotate(angle);
-					ctx.fillText(this.graph[i][j], 0, -2);
-					ctx.restore();
+                    ctx.rotate(angle);
+                    ctx.fillText(this.graph[i][j], 0, -2);
+                    ctx.restore();
                 }
             }
         }
-
-
-        /*
-        let graphJSON = {
-            "nodes": [],
-            "edges": []
-        };
-
-        for (let i = 0; i < this.nb_points; i++) {
-            graphJSON["nodes"].push(i.toString());
-
-            for (let j = 0; j < this.nb_points; j++) {
-                if (this.graph[i][j] > 0) {
-                    graphJSON["edges"].push([
-                        i.toString(),
-                        j.toString(),
-                        {
-                            label: this.graph[i][j].toString(),
-                            font: "20px Arial"
-                        }
-                    ]);
-                }
-            }
-        }
-        let graph = new Springy.Graph(() => {
-            this.update();
-        });
-        graph.loadJSON(graphJSON);
-
-        //TODO: try to know when it's done
-        jQuery('#canvas').springy({
-            graph: graph,
-            'update': (edge) => {
-                return this.update_color(edge);
-            },
-        });
-        */
     }
 }

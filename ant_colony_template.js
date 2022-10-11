@@ -11,15 +11,16 @@ class AntColony {
         this.nb_ants = nb_ants;
         this.graph = [];
         this.pheromone = [];
+
+        this.pheromone_default = 1;
     }
 
     set _graph(_graph) {
         this.graph = _graph;
-        this.nb_edges = this.calculate_edges();
         
         for (let _ of _graph) {
             this.pheromone.push(Array.apply(null, Array(_graph.length)).map(function (x, i) {
-                return .2;
+                return this.pheromone_default;
             }));
         }
     }
@@ -29,6 +30,6 @@ class AntColony {
     }
 
     get_pheromone(source, target){
-        return 1; // return pheromone of arc from source to target
+        return this.pheromone[source][target];
     }
 }

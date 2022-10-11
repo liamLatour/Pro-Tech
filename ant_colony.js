@@ -90,7 +90,7 @@ class Ant {
 class AntColony {
     constructor(nb_ants = 40) {
         this.nb_ants = nb_ants;
-        this.g = null; // graph
+        this.graph = []; // graph
         this.pheromone = [];
 
         // pheromone parameters
@@ -101,13 +101,12 @@ class AntColony {
         this.elitism = 1; // odd, min is 1
     }
 
-    set graph(graph) {
-        this.g = graph;
-        let pheromone_default = this.pheromone_default;
-
-        for (let _ of this.g.graph) {
-            this.pheromone.push(Array.apply(null, Array(this.g.graph.length)).map(function (x, i) {
-                return pheromone_default;
+    set _graph(_graph) {
+        this.graph = _graph;
+        
+        for (let _ of _graph) {
+            this.pheromone.push(Array.apply(null, Array(_graph.length)).map(function (x, i) {
+                return this.pheromone_default;
             }));
         }
     }
