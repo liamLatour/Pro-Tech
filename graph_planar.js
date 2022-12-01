@@ -2,17 +2,17 @@
 //   array 1 contains neighbors of node 1
 //   negative weight is not a connection
 class Graph {
-    constructor(nb_points = 5, connectivity = .5) {
+    constructor(nb_points = 10, connectivity = .5) {
         this.nb_points = nb_points;
         this.connectivity = connectivity;
         this.graph = [];
         this.ant_colony = new AntColony();
 
-        // data on graph
-        this.wind_direction = 0;
         this.wind_power = 10;
+        this.wind_direction = 0;
+        
+        // data on graph
         this.nb_edges = 0;
-        this.longest_edge = 0;
 
         // position of nodes
         this.grid_size = 20;
@@ -31,6 +31,8 @@ class Graph {
         this.line_offset = 3;
         this.edge_font = "14px Verdana, sans-serif";
         this.stop = false;
+
+        console.log(this.intersects([0, 0], [1, 1], [1, 0], [1, 1]));
     }
 
     distance(u, v = [0, 0]) {
@@ -40,7 +42,7 @@ class Graph {
     winded_distance(u, v) {
         let wind_effect = this.dot(this.sub(v, u), this.wind_direction);
         let dist = this.distance(u, v);
-        return Math.exp(-wind_effect / dist) * dist + .1;
+        return Math.max(Math.exp(-wind_effect / dist) * dist, .1);
     }
 
     nearest_node(u) {
@@ -63,8 +65,8 @@ class Graph {
     generate() {
         this.graph = [];
         this.nodes_position = [];
-        this.wind_direction = [0, 1]; //random.rand_gen()*Math.PI*2;
-        console.log(this.winded_distance([0, 0], [0, -10]));
+        let wind_angle = random.rand_gen()*Math.PI*2;
+        this.wind_direction = [Math.cos(wind_angle), Math.sin(wind_angle)];
 
         // position points
         for (let i = 0; i < this.nb_points; i++) {
@@ -96,18 +98,20 @@ class Graph {
         }
 
         // remove nb of arcs according to connectivity
-        let max_arcs_to_remove = (this.nb_points * this.nb_points - 3 * this.nb_points) / 2;
-        let nb_arcs_remove = Math.round((1 - this.connectivity) * max_arcs_to_remove);
+        //let max_arcs_to_remove = (this.nb_points * this.nb_points - 3 * this.nb_points) / 2;
+        //let nb_arcs_remove = Math.round((1 - this.connectivity) * max_arcs_to_remove);
 
         // first remove non planar arcs
         let non_planar_arcs = this.non_planar_arcs();
 
         while (non_planar_arcs.length > 0) {
-            let to_remove = random.rand_in_array(non_planar_arcs);
+            const max = non_planar_arcs.reduce((prev, current) => (prev[2] > current[2]) ? prev : current)[2];
+            let to_remove = random.rand_in_array(non_planar_arcs.filter((el)=>(el[2]==max)));
+
             this.graph[to_remove[1]][to_remove[0]] = -1;
             this.graph[to_remove[0]][to_remove[1]] = -1;
             non_planar_arcs = this.non_planar_arcs();
-            nb_arcs_remove--;
+            //nb_arcs_remove--;
         }
 
         // for (let i = 0; i < nb_arcs_remove; i++) {
@@ -121,14 +125,8 @@ class Graph {
         // }
 
         //this.nb_edges = (this.nb_points * (this.nb_points - 1)) / 2 - nb_arcs_remove;
-        this.longest_edge = this.getMax(this.graph);
-
-        this.ant_colony.graph = this.graph;
     }
 
-    getMax(a) {
-        return Math.max(...a.map(e => Array.isArray(e) ? this.getMax(e) : e));
-    }
 
     non_planar_arcs() {
         let valid_arcs = this.get_valid_arcs();
@@ -138,8 +136,9 @@ class Graph {
         for (let arc in valid_arcs) {
             let i = valid_arcs[arc][0];
             let j = valid_arcs[arc][1];
-            if (this.graph[i][j] > 0 && this.non_planar_arc(this.nodes_position[i], this.nodes_position[j])) {
-                non_planar_arcs.push([i, j]);
+            let intersects = this.non_planar_arc(this.nodes_position[i], this.nodes_position[j]);
+            if (this.graph[i][j] > 0 && intersects > 0) {
+                non_planar_arcs.push([i, j, intersects]);
             }
         }
 
@@ -147,15 +146,17 @@ class Graph {
     }
 
     non_planar_arc(u, v) {
+        let intersects = 0;
+
         for (let i = 0; i < this.nb_points; i++) {
             for (let j = 0; j < this.nb_points; j++) {
                 if (this.graph[i][j] > 0 && this.intersects(u, v, this.nodes_position[i], this.nodes_position[j])) {
-                    return true;
+                    intersects ++;
                 }
             }
         }
 
-        return false;
+        return intersects;
     }
 
     sub(a, b) {
@@ -203,21 +204,57 @@ class Graph {
         return this.add(a, this.mul(direction, d));
     }
 
-    intersects(p, v1, q, v2) {
-        if (p == q || p == v2 || v1 == q || v1 == v2) {
+    equalPoints(a, b){
+        return a[0] == b[0] && a[1] == b[1];
+    }
+
+    allEqual(args) {
+        let firstValue = arguments[0],
+            i;
+        for (i = 1; i < arguments.length; i += 1) {
+            if (arguments[i] != firstValue) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    intersects(p, p2, q, q2) {
+        if (this.equalPoints(p, q) || this.equalPoints(p, q2) || this.equalPoints(p2, q) || this.equalPoints(p2, q2)) {
+            return false
+        }
+
+        let r = this.sub(p2, p);
+        let s = this.sub(q2, q);
+
+        let uNumerator = this.cross(this.sub(q, p), r);
+        let rs = this.cross(r, s);
+
+        if (uNumerator == 0 && rs == 0) {
+            // They are coLlinear
+
+            // Do they overlap? (Are all the point differences in either direction the same sign)
+            return this.allEqual(
+                    (q.x - p.x < 0),
+                    (q.x - p2.x < 0),
+                    (q2.x - p.x < 0),
+                    (q2.x - p2.x < 0)) ||
+                this.allEqual(
+                    (q.y - p.y < 0),
+                    (q.y - p2.y < 0),
+                    (q2.y - p.y < 0),
+                    (q2.y - p2.y < 0));
+        }
+
+        if (rs == 0) {
+            // lines are paralell
             return false;
         }
 
-        let r = this.sub(v1, p);
-        let s = this.sub(v2, q);
+        let u = uNumerator / rs;
+        let t = this.cross(this.sub(q, p), s) / rs;
 
-        let rs = this.cross(r, s);
-        let qp = this.sub(q, p)
-
-        let t = this.cross(qp, s) / rs;
-        let u = this.cross(qp, r) / rs;
-
-        return rs != 0 && t <= 1 && t >= 0 && u <= 1 && u >= 0;
+        return (t >= 0) && (t <= 1) && (u >= 0) && (u <= 1);
     }
 
     get_bridge_arcs() {
@@ -280,22 +317,29 @@ class Graph {
     }
 
     run() {
-        let t = this;
+        let that = this;
 
-        this.ant_colony.next_iteration();
-        this.draw();
+        this.ant_colony.initialize(this.graph);
+        doWork();
 
-        setTimeout(() => {
-            if(!t.stop){
-                t.run();
-            }
-        }, 200);
+        function doWork() {
+            setTimeout(function() {
+                that.ant_colony.send_ants();
+                that.draw();
+                that.ant_colony.update_pheromones();
+                doWork();
+            }, 200);
+        }
     }
 
     edge_color(source, target) {
-        let value = Math.floor(this.ant_colony.get_pheromone(source, target) * 255).toString(16);
+        //let value = Math.floor(this.ant_colony.get_pheromone(source, target)/2+1 * 255).toString(16);
 
-        return "#" + value + "0000";
+        if(this.ant_colony.in_best_path(source, target)){
+            return "#0000FF";
+        }
+
+        return "#ff0000";
     }
 
     draw() {

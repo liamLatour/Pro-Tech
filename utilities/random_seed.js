@@ -63,10 +63,10 @@ class Random {
         if(coefs!=0){
             let current = 0;
             let rand = this.rand_gen();
-            coefs = this.normalize_coefs(coefs);
+            let norm_coefs = this.normalize_coefs(coefs);
 
             for(let i=0; i<array.length; i++){
-                current += coefs[i];
+                current += norm_coefs[i];
                 if(current >= rand){
                     return array[i];
                 }
