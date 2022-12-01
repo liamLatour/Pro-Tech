@@ -45,6 +45,10 @@ class Random {
         }
     }
 
+    rand_int(min, max){
+        return Math.round(this.rand_gen() * ((max-min) - 1))+min;
+    }
+
     rand_weight() {
         return Math.round(this.rand_gen() * 40) + 1;
     }
@@ -59,16 +63,16 @@ class Random {
         if(coefs!=0){
             let current = 0;
             let rand = this.rand_gen();
-            coefs = this.normalize_coefs(coefs);
+            let norm_coefs = this.normalize_coefs(coefs);
 
             for(let i=0; i<array.length; i++){
-                current += coefs[i];
+                current += norm_coefs[i];
                 if(current >= rand){
                     return array[i];
                 }
             }
         }
-        return array[Math.round(this.rand_gen() * (array.length - 1))];
+        return array[this.rand_int(0, array.length)];
     }
 }
 
