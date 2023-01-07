@@ -49,9 +49,7 @@ class Ant {
         for (let x = 0; x < graph.length; x++) {
             this.seen[x] = [];
             for (let y = 0; y < graph.length; y++) {
-                if (x !== y) {
-                    this.seen[x][y] = 0;
-                }
+                this.seen[x][y] = 0;
             }
         }
 
@@ -100,10 +98,10 @@ class Ant {
         let ph = Math.pow(pheromones[start][end], this.pheromone_importance);
         let he = Math.pow(heuristic, this.heuristic_importance);
 
-        console.log("###");
-        console.log(new_bonus);
-        console.log(ph);
-        console.log(he);
+        //console.log("###");
+        //console.log(new_bonus);
+        //console.log(ph);
+        //console.log(he);
 
         return ph * he;
     }

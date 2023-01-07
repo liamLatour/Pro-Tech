@@ -12,7 +12,6 @@ $('#form').submit(function () {
     graph.stop = true;
     graph = new Graph(nb, conn);
     graph.generate();
-    graph.stop = false;
     graph.run();
 
     return false;
