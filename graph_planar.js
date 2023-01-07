@@ -31,8 +31,6 @@ class Graph {
         this.line_offset = 3;
         this.edge_font = "14px Verdana, sans-serif";
         this.stop = false;
-
-        console.log(this.intersects([0, 0], [1, 1], [1, 0], [1, 1]));
     }
 
     distance(u, v = [0, 0]) {
@@ -62,10 +60,21 @@ class Graph {
         return [random.rand_gen() * this.grid_size, random.rand_gen() * this.grid_size];
     }
 
+    generate_pheromone_array(){
+        let res = "";
+
+        for(let i=0; i<this.graph.length**2; i++){
+            res += "<div class=\"square\"></div>";
+        }
+
+        $("#grid").css("grid-template-columns", "repeat("+this.graph.length+", 1fr)");
+        document.getElementById("grid").innerHTML = res;
+    }
+
     generate() {
         this.graph = [];
         this.nodes_position = [];
-        let wind_angle = random.rand_gen()*Math.PI*2;
+        let wind_angle = 0;//random.rand_gen()*Math.PI*2;
         this.wind_direction = [Math.cos(wind_angle), Math.sin(wind_angle)];
 
         // position points
@@ -124,7 +133,7 @@ class Graph {
         //     }
         // }
 
-        //this.nb_edges = (this.nb_points * (this.nb_points - 1)) / 2 - nb_arcs_remove;
+        this.generate_pheromone_array();
     }
 
 
@@ -324,10 +333,11 @@ class Graph {
 
         function doWork() {
             setTimeout(function() {
-                that.ant_colony.send_ants();
+                that.ant_colony.run();
                 that.draw();
-                that.ant_colony.update_pheromones();
-                doWork();
+                if(!that.stop){
+                    doWork();
+                }
             }, 200);
         }
     }
@@ -336,13 +346,21 @@ class Graph {
         //let value = Math.floor(this.ant_colony.get_pheromone(source, target)/2+1 * 255).toString(16);
 
         if(this.ant_colony.in_best_path(source, target)){
-            return "#0000FF";
+            return "#ff0000";
         }
 
-        return "#ff0000";
+        return "#000000";
     }
 
     draw() {
+        document.getElementById("short_path").innerHTML = Math.round(this.ant_colony.best_length);
+
+        for(let i=0; i<this.graph.length; i++){
+            for(let j=0; j<this.graph.length; j++){
+                $(".square").eq(i*this.graph.length+j).css("background-color", "#"+Math.floor(this.ant_colony.get_pheromone(i, j) * 255).toString(16)+"0000");
+            }
+        }
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let w = canvas.clientWidth / (this.grid_size + 2);
 
@@ -357,6 +375,7 @@ class Graph {
             for (let j = 0; j < this.nb_points; j++) {
                 if (this.graph[i][j] > 0) {
                     ctx.fillStyle = this.edge_color(i, j);
+                    ctx.strokeStyle = this.edge_color(i, j);
 
                     let x1 = (this.nodes_position[i][0] + 1) * w;
                     let y1 = (this.nodes_position[i][1] + 1) * w;
@@ -397,9 +416,9 @@ class Graph {
                     ctx.textBaseline = "top";
                     ctx.font = this.edge_font;
                     let angle = Math.atan2(y2 - y1, x2 - x1);
-                    let displacement = -14;
+                    let displacement = 14;
                     if ((angle > Math.PI / 2 || angle < -Math.PI / 2)) {
-                        displacement = -20;
+                        displacement = 8;
                         angle += Math.PI;
                     }
                     let textPos = this.offset(this.mul(this.add(off[0], off[1]), .5), off[1], displacement);
