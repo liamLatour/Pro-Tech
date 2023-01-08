@@ -1,6 +1,5 @@
 class Ant {
     constructor(pheromone_importance, heuristic_importance, added_pheromone) {
-
         this.pheromone_importance = pheromone_importance;
         this.heuristic_importance = heuristic_importance;
         this.added_pheromone = added_pheromone;
@@ -9,28 +8,6 @@ class Ant {
         this.path = [];
         this.seen = [];
         this.max_iterations = 100;
-
-        //this.seen = [];
-
-        //this.current = random.rand_in_array(Array.apply(null, Array(graph.length)).map(function (x, i) {
-        //    return i;
-        //})); // random nb between 0 and graph length
-
-
-        //this.start = this.current;
-        //this.graph = graph;
-        //this.longest_edge = longest_edge;
-        //this.pheromones = pheromones;
-
-
-        //for (let _ of graph) {
-        //    this.seen.push(Array.apply(null, Array(graph.length)).map(function (x, i) {
-        //        return 0;
-        //    }));
-        //}
-
-        //this.dnf = false;
-        //this.max_iterations = 100;
     }
 
     visited_everything(graph) {
@@ -93,17 +70,12 @@ class Ant {
             new_bonus = 0.1;
         }
 
-        let heuristic = 1 / graph[start][end] + new_bonus;
+        let heuristic = 60 - graph[start][end] + new_bonus;
         
-        let ph = Math.pow(pheromones[start][end], this.pheromone_importance);
-        let he = Math.pow(heuristic, this.heuristic_importance);
+        let ph = pheromones[start][end] * this.pheromone_importance;
+        let he = heuristic * this.heuristic_importance;
 
-        //console.log("###");
-        //console.log(new_bonus);
-        //console.log(ph);
-        //console.log(he);
-
-        return ph * he;
+        return ph + he;
     }
 
     choose_next(current, graph, pheromones) {
@@ -114,6 +86,7 @@ class Ant {
             probabilities.push(this.calculate_probability(graph, pheromones, current, neighbourg));
         }
 
+        console.log(probabilities);
         return random.rand_in_array(neighbourgs, probabilities);;
     }
 
@@ -133,11 +106,6 @@ class Ant {
                 }
             }
         }
-
-        // for (let i = 1; i < this.path.length; i++) {
-        //     pheromones[this.path[i - 1]][this.path[i]] += (1 / this.walk_length) * this.added_pheromone;
-        //     pheromones[this.path[i]][this.path[i - 1]] += (1 / this.walk_length) * this.added_pheromone;
-        // }
     }
 
     calculate_walk_length(graph) {
@@ -148,69 +116,4 @@ class Ant {
 
         return len;
     }
-
-
-
-
-
-
-/*
-    get_neighbors() {
-        let neighbors = [];
-        let neighbors_attractiveness = [];
-
-        for (let i = 0; i < this.graph.length; i++) {
-            if (this.graph[this.current][i] > 0) {
-                neighbors.push(i);
-                let attractiveness = Math.pow(this.pheromones[this.current][i], this.pheromone_importance) *
-                    Math.pow(this.get_heuristic(this.current, i), this.heuristic_importance);
-                neighbors_attractiveness.push(attractiveness);
-            }
-        }
-
-        return [neighbors, neighbors_attractiveness];
-    }
-
-    chooseNext() {
-        let filtered = this.get_neighbors();
-        let neighbors = filtered[0];
-        let neighbors_attractiveness = filtered[1];
-
-        let next = random.rand_in_array(neighbors, neighbors_attractiveness);
-        this.seen[this.current][next]++;
-        this.current = next;
-    }
-
-    run() {
-        let i = 0;
-
-        //TODO: it has to close too
-
-        while (!(i > this.max_iterations || (this.visited_everything() && this.current == this.start))) {
-            this.choose_next();
-            i++;
-        }
-
-        // Check if it finished or not and punish it if not
-        if (i == this.max_iterations) {
-            console.log("dnf");
-            this.dnf = true;
-        }
-    }
-
-    path_length() {
-        let sum = 0;
-
-        for (let i = 0; i < this.seen.length; i++) {
-            for (let j = 0; j < this.seen.length; j++) {
-                sum += this.graph[i][j] * this.seen[i][j];
-            }
-        }
-
-        if (this.dnf) {
-            return sum * 2;
-        }
-        return sum;
-    }
-    */
 }

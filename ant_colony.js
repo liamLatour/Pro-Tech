@@ -4,7 +4,7 @@ class AntColony {
                 heuristic_importance = 2,
                 pheromone_evaporation_rate = .2,
                 pheromone_default = 1,
-                added_pheromone = 1
+                added_pheromone = .1
         ) {
         this.nb_ants = nb_ants;
         
@@ -47,6 +47,8 @@ class AntColony {
         }
     }
 
+
+
     get_pheromone(source, target) {
         return this.pheromones[source][target];
     }
@@ -88,7 +90,7 @@ class AntColony {
         }
         this.update_pheromones()
         //console.log(this.best_length);
-        //console.log(this.worst_length);
+        //console.log(this.pheromones);
         //console.log(this.graph);
         //console.log(this.best_path);
     }

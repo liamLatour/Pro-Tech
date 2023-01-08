@@ -2,11 +2,15 @@
 //   array 1 contains neighbors of node 1
 //   negative weight is not a connection
 class Graph {
-    constructor(nb_points = 10, connectivity = .5) {
+    constructor(
+        nb_points = 10,
+        nb_ants = 10,
+        pheromone_importance = 1,
+        pheromone_evaporation_rate = .2,) {
+        
         this.nb_points = nb_points;
-        this.connectivity = connectivity;
         this.graph = [];
-        this.ant_colony = new AntColony();
+        this.ant_colony = new AntColony(nb_ants, pheromone_importance, 1-pheromone_importance, pheromone_evaporation_rate);
 
         this.wind_power = 10;
         this.wind_direction = 0;
@@ -106,10 +110,6 @@ class Graph {
             this.graph.push(arr);
         }
 
-        // remove nb of arcs according to connectivity
-        //let max_arcs_to_remove = (this.nb_points * this.nb_points - 3 * this.nb_points) / 2;
-        //let nb_arcs_remove = Math.round((1 - this.connectivity) * max_arcs_to_remove);
-
         // first remove non planar arcs
         let non_planar_arcs = this.non_planar_arcs();
 
@@ -120,18 +120,7 @@ class Graph {
             this.graph[to_remove[1]][to_remove[0]] = -1;
             this.graph[to_remove[0]][to_remove[1]] = -1;
             non_planar_arcs = this.non_planar_arcs();
-            //nb_arcs_remove--;
         }
-
-        // for (let i = 0; i < nb_arcs_remove; i++) {
-        //     let valid_arc = this.get_valid_arc();
-
-        //     // have to find inner cycles
-        //     if (valid_arc.length > 0) {
-        //         this.graph[valid_arc[1]][valid_arc[0]] = -1;
-        //         this.graph[valid_arc[0]][valid_arc[1]] = -1;
-        //     }
-        // }
 
         this.generate_pheromone_array();
     }
