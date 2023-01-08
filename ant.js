@@ -23,6 +23,8 @@ class Ant {
     }
 
     walk(graph, pheromones) {
+        //console.log(pheromones);
+
         for (let x = 0; x < graph.length; x++) {
             this.seen[x] = [];
             for (let y = 0; y < graph.length; y++) {
@@ -47,7 +49,6 @@ class Ant {
             console.log("dnf");
         }
 
-        //console.log(this.path.length);
         this.walk_length = this.calculate_walk_length(graph);
     }
 
@@ -63,19 +64,17 @@ class Ant {
     }
 
     calculate_probability(graph, pheromones, start, end) {
-        let new_bonus = 1;
+        let new_bonus = .5;
         if (this.seen[start][end] + this.seen[end][start] == 1) {
-            new_bonus = .4;
+            new_bonus = .2;
         } else if (this.seen[start][end] + this.seen[end][start] > 1) {
-            new_bonus = 0.1;
+            new_bonus = .05;
         }
-
-        let heuristic = 60 - graph[start][end] + new_bonus;
         
-        let ph = pheromones[start][end] * this.pheromone_importance;
-        let he = heuristic * this.heuristic_importance;
+        let ph = Math.pow(pheromones[start][end], this.pheromone_importance);
+        let he = Math.pow(1/graph[start][end], this.heuristic_importance);
 
-        return ph + he;
+        return ph * he + new_bonus;
     }
 
     choose_next(current, graph, pheromones) {
@@ -86,7 +85,6 @@ class Ant {
             probabilities.push(this.calculate_probability(graph, pheromones, current, neighbourg));
         }
 
-        console.log(probabilities);
         return random.rand_in_array(neighbourgs, probabilities);;
     }
 
@@ -94,10 +92,12 @@ class Ant {
         if(this.walk_length > (best_length+worst_length)/3){
             return;
         }
-
+        /*
         let a = .1/(best_length-worst_length);
         let b = .1*worst_length/(worst_length-best_length);
         let value = (a*this.walk_length+b) * this.added_pheromone;
+        */
+        let value = this.added_pheromone/this.walk_length;
 
         for(let i=0; i<this.seen.length; i++){
             for(let j=0; j<this.seen.length; j++){

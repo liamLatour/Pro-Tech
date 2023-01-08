@@ -8,12 +8,13 @@ function generate_graph(){
     let nb_ants = $('#nb_ants').val();
     let importance = $('#importance').val();
     let evaporation = $('#evaporation').val();
+    let added_pheromone = $('#adding').val();
 
     if(graph!=null){
         graph.stop = true;
     }
 
-    graph = new Graph(nb, nb_ants, importance, evaporation);
+    graph = new Graph(nb, nb_ants, importance, evaporation, added_pheromone);
     graph.generate();
     graph.run();
 }
