@@ -6,11 +6,12 @@ class Graph {
         nb_points = 10,
         nb_ants = 10,
         pheromone_importance = 1,
-        pheromone_evaporation_rate = .2,) {
+        pheromone_evaporation_rate = .2,
+        added_pheromone = 1) {
         
         this.nb_points = nb_points;
         this.graph = [];
-        this.ant_colony = new AntColony(nb_ants, pheromone_importance, 1-pheromone_importance, pheromone_evaporation_rate);
+        this.ant_colony = new AntColony(nb_ants, pheromone_importance, 1-pheromone_importance, added_pheromone);
 
         this.wind_power = 10;
         this.wind_direction = 0;
@@ -327,7 +328,7 @@ class Graph {
                 if(!that.stop){
                     doWork();
                 }
-            }, 200);
+            }, 20);
         }
     }
 

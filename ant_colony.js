@@ -3,8 +3,8 @@ class AntColony {
                 pheromone_importance = 1,
                 heuristic_importance = 2,
                 pheromone_evaporation_rate = .2,
-                pheromone_default = 1,
-                added_pheromone = .1
+                added_pheromone = 1,
+                pheromone_default = 1
         ) {
         this.nb_ants = nb_ants;
         
@@ -12,6 +12,8 @@ class AntColony {
         this.population = [];
         this.pheromones = [];
         this.best_path = [];
+
+        this.best_length = 10000;
 
         // pheromone parameters
         this.pheromone_importance = pheromone_importance; // >0
@@ -47,8 +49,6 @@ class AntColony {
         }
     }
 
-
-
     get_pheromone(source, target) {
         return this.pheromones[source][target];
     }
@@ -70,19 +70,16 @@ class AntColony {
     }
 
     run(){
-        for(let i=0; i<10; i++){
-            this.send_ants();
-        }
+        this.send_ants();
     }
 
     send_ants() {
-        this.best_length = 10000;
         this.worst_length = 0;
         for(let i = 0; i < this.nb_ants; i++) {
             this.population[i].walk(this.graph, this.pheromones);
             if(this.population[i].walk_length < this.best_length){
                 this.best_length = this.population[i].walk_length;
-                this.best_path = this.population[i].seen;
+                this.best_path = [...this.population[i].seen];
             }
             if(this.population[i].walk_length > this.worst_length){
                 this.worst_length = this.population[i].walk_length;
@@ -101,7 +98,8 @@ class AntColony {
         for(let i = 0; i < this.nb_ants; i++) {
             this.population[i].lay_pheromones(this.pheromones, this.best_length, this.worst_length);
         }
-        this.max_pheromone = this.get_max(this.pheromones);
+        this.max_pheromone = Math.max(this.get_max(this.pheromones), 0.001);
+        //console.log(this.pheromones.toString());
         this.normalize();
     }
     
