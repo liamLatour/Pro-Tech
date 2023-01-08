@@ -19,8 +19,15 @@
         <label for="nb_node" class="label">Nombre de noeuds</label>
         <input type="range" id="nb_node" value="5" min="2" max="20" oninput="this.nextElementSibling.value = this.value">
         <output>10</output><br><br>
-        <label for="connectivity" class="label">Connectivité</label>
-        <input type="range" id="connectivity" value=".5" min="0" max="1" step=".01" name="connectivity"><br><br>
+        <label for="nb_ants" class="label">Nombre de fourmis</label>
+        <input type="range" id="nb_ants" value="10" min="1" max="100" oninput="this.nextElementSibling.value = this.value">
+        <output>10</output><br><br>
+        <label for="importance" class="label">Heuristique/Pheromone</label>
+        <input type="range" id="importance" value=".5" min="0" max="1" step=".01" name="importance"><br><br>
+        <label for="evaporation" class="label">Évaporation</label>
+        <input type="range" id="evaporation" value=".1" min="0.01" max="1" step=".01" name="evaporation"><br><br>
+        <label for="adding" class="label">Ajout phéromones</label>
+        <input type="range" id="adding" value="1.5" min="0.1" max="10" step=".01" name="evaporation"><br><br>
         <label for="seed_input" class="label">Seed</label>
         <input type="text" id="seed_input" name="seed_input"><br><br>
         
